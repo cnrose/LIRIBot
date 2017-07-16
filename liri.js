@@ -39,13 +39,18 @@ switch (command) {
 		break;
 
 	case "movie-this":
-		console.log("soon");
+		if (searchTerm) {
+			queryMovie(searchTerm);
+		} else {
+			queryMovie("Mr. Nobody");
+		}
 		break;
 
 	case "do-what-it-says":
-		console.log("soon");
+		doThisThing();
 		break;			
 }
+
 
 //twitter function
 function getTweets() {
@@ -56,7 +61,7 @@ function getTweets() {
 	};
 	client.get("statuses/user_timeline", parameters, function(error, tweets, response) {
 		if(error){
-			console.log("Oops, an error occured! + error: " + error);
+			console.log("Oops, an error occured! Error: " + error);
 		} else {
 			for (var i = 0; i < tweets.length; i++){
 				var date = tweets[i].created_at;
@@ -73,7 +78,7 @@ function querySong(track) {
 	
 	spotify.search({type: 'track', query: track, limit: '1'}, function(err, data){
 		if (err){
-			console.log("Oops, an error occured! + error: " + error);
+			console.log("Oops, an error occured! Error: " + error);
 		} else {
 			var song = data.tracks.items[0].name;
 			var artist = data.tracks.items[0].artists[0].name;
@@ -87,5 +92,43 @@ function querySong(track) {
 				
 		};
 	});		
-}
-	
+};
+
+//OMDB function
+function queryMovie(movie) {
+	var queryUrl = "http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=40e9cece";
+
+	request(queryUrl, function(error, response, body) {
+		if (error) {
+			console.log("Oops, an error occured! " + error);
+		} else {
+			console.log("Title: " + JSON.parse(body).Title);
+			console.log("Release Year: " + JSON.parse(body).Year);
+			console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
+			console.log("Rotton Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value);
+			console.log("Country of Production: " + JSON.parse(body).Country);
+			console.log("Language: " + JSON.parse(body).Language);
+			console.log("Plot: " + JSON.parse(body).Plot);
+			console.log("Actors: " + JSON.parse(body).Actors);
+		}
+
+		if (movie === "Mr. Nobody") {
+			console.log("****************");
+			console.log("If you haven't watched Mr. Nobody, then you should: http://www.imdb.com/title/tt0485947/");
+			console.log("It's on Netflix!");
+		};
+	});
+};
+
+//do what it says function
+function doThisThing() {
+	fs.readFile("random.txt", "utf8", function(error, data){
+		if(error){
+			console.log("Oops, an error occured! Error: " + error);
+		} else {
+			var splitData = data.split(",");
+
+			querySong(splitData[1]);
+		};
+	});
+};
